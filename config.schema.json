@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/abinnovision/frp-server-plugin-cel/config.schema.json",
+  "title": "frp-cel-plugin configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "bind": { "type": "string", "default": ":9001" },
+    "path": { "type": "string", "default": "/handler" },
+    "defaultAction": { "enum": ["allow", "reject"], "default": "allow" },
+    "defaultRejectReason": { "type": "string", "default": "rejected by default policy" },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule" }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "ops", "when", "action"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "ops": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "when": { "type": "string", "minLength": 1, "description": "CEL expression evaluating to bool" },
+        "action": { "enum": ["allow", "reject", "rewrite"] },
+        "reason": { "type": "string", "minLength": 1 },
+        "content": { "type": "string", "minLength": 1, "description": "CEL expression evaluating to a map; required for rewrite" },
+        "onError": { "enum": ["skip", "reject"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "action": { "const": "reject" } } },
+          "then": { "required": ["reason"] }
+        },
+        {
+          "if": { "properties": { "action": { "const": "rewrite" } } },
+          "then": { "required": ["content"] }
+        }
+      ]
+    }
+  }
+}

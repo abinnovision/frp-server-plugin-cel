@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=./config.schema.json
+bind: ":9001"
+path: /handler
+defaultAction: allow
+rules:
+  - name: restrict-custom-domains
+    ops: [NewProxy]
+    when: |
+      has(content.custom_domains) &&
+      !content.custom_domains.all(d, d.endsWith(".tunnels.example.com"))
+    action: reject
+    reason: "custom_domains must be under *.tunnels.example.com"
+  - name: force-ci-bandwidth-limit
+    ops: [NewProxy]
+    when: "content.user.user == 'ci-bot'"
+    action: rewrite
+    content: |
+      content.with({"bandwidth_limit": "1MB"})

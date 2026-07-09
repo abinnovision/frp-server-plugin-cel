@@ -1,0 +1,60 @@
+version: 2
+
+project_name: frp-cel-plugin
+
+builds:
+  - id: frp-cel-plugin
+    main: ./cmd/frp-cel-plugin
+    binary: frp-cel-plugin
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: amd64
+
+dockers_v2:
+  - id: frp-cel-plugin
+    dockerfile: Dockerfile
+    ids:
+      - frp-cel-plugin
+    images:
+      - ghcr.io/abinnovision/frp-server-plugin-cel
+    tags:
+      - "{{ .Version }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.source: https://github.com/abinnovision/frp-server-plugin-cel
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+
+archives:
+  - formats: [tar.gz]
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^feat'
+      order: 0
+    - title: Fixes
+      regexp: '^fix'
+      order: 1
+    - title: Other
+      order: 999
