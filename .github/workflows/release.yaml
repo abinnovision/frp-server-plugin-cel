@@ -21,6 +21,8 @@ jobs:
           go-version-file: go.mod
       - name: Compute next version
         id: svu
+        env:
+          GOTOOLCHAIN: auto # setup-go@v6 defaults to 'local'; svu may need a newer toolchain than go.mod
         run: |
           go install github.com/caarlos0/svu/v3@latest
           current="$(svu current 2>/dev/null || echo v0.0.0)"
